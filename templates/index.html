@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedScan AI - Brain Tumor Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --medical-blue: #0066cc;
+            --medical-light-blue: #e6f3ff;
+            --medical-dark-blue: #004499;
+            --medical-green: #28a745;
+            --medical-red: #dc3545;
+            --medical-orange: #fd7e14;
+            --medical-gray: #6c757d;
+            --medical-light-gray: #f8f9fa;
+            --medical-border: #dee2e6;
+            --white: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6c7d;
+            --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
+            --shadow-heavy: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--medical-light-blue) 0%, #f0f8ff 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Medical grid pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0,102,204,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,102,204,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header Medical Style */
+        .medical-header {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 2rem;
+            padding: 2.5rem;
+            text-align: center;
+            border-left: 5px solid var(--medical-blue);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .medical-header .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .medical-header .logo-icon {
+            background: var(--medical-blue);
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .medical-header h1 {
+            color: var(--medical-blue);
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .medical-header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .medical-header .description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Medical Cards */
+        .medical-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--medical-border);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .medical-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header-medical {
+            background: linear-gradient(90deg, var(--medical-blue), var(--medical-dark-blue));
+            color: white;
+            padding: 1.5rem 2rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-body-medical {
+            padding: 2.5rem;
+        }
+
+        /* Upload Section */
+        .upload-zone {
+            border: 2px dashed var(--medical-border);
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: var(--medical-light-gray);
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--medical-blue);
+            background: var(--medical-light-blue);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--medical-green);
+            background: #e8f5e8;
+            transform: scale(1.01);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--medical-gray);
+            margin-bottom: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .upload-zone:hover .upload-icon {
+            color: var(--medical-blue);
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn-medical-primary {
+            background: var(--medical-blue);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-medical-primary:hover {
+            background: var(--medical-dark-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-medical-success {
+            background: var(--medical-green);
+            border: none;
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+            width: 100%;
+            margin-top: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: none;
+        }
+
+        .btn-medical-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* File Preview */
+        .file-preview {
+            display: none;
+            margin-top: 2rem;
+            padding: 2rem;
+            border: 1px solid var(--medical-border);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 1rem;
+            border: 2px solid var(--medical-border);
+        }
+
+        .file-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Results Section */
+        .results-section {
+            animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+
+        .result-alert {
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 5px solid;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .result-alert.no-tumor {
+            background: #d4edda;
+            border-color: var(--medical-green);
+            color: #155724;
+        }
+
+        .result-alert.tumor-detected {
+            background: #f8d7da;
+            border-color: var(--medical-red);
+            color: #721c24;
+        }
+
+        .result-icon-large {
+            font-size: 3rem;
+            padding: 1.5rem;
+            border-radius: 50%;
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .result-icon-large.success {
+            background: var(--medical-green);
+        }
+
+        .result-icon-large.warning {
+            background: var(--medical-red);
+        }
+
+        .result-content h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .medical-info {
+            background: var(--medical-light-blue);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--medical-blue);
+            margin-top: 1.5rem;
+        }
+
+        .medical-info h5 {
+            color: var(--medical-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .image-display {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: var(--medical-light-gray);
+            border-radius: 8px;
+        }
+
+        .analyzed-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-medium);
+            border: 3px solid var(--medical-border);
+            transition: transform 0.3s ease;
+        }
+
+        .analyzed-image:hover {
+            transform: scale(1.02);
+        }
+
+        /* Loading Animation */
+        .loading-section {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .medical-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--medical-light-blue);
+            border-top: 4px solid var(--medical-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--medical-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .loading-subtext {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .progress-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress {
+            height: 8px;
+            background: var(--medical-light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--medical-blue), var(--medical-green));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        /* Medical Footer Info */
+        .medical-disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-left: 4px solid var(--medical-orange);
+        }
+
+        .medical-disclaimer h6 {
+            color: #856404;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .medical-disclaimer p {
+            color: #856404;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .medical-header {
+                padding: 2rem 1.5rem;
+            }
+            
+            .medical-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .medical-header .logo-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            
+            .card-body-medical {
+                padding: 1.5rem;
+            }
+            
+            .upload-zone {
+                padding: 2rem 1rem;
+            }
+            
+            .upload-icon {
+                font-size: 3rem;
+            }
+            
+            .result-alert {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Medical Header -->
+        <div class="medical-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div>
+                    <h1>MedScan AI</h1>
+                    <div class="subtitle">Brain Tumor Detection System</div>
+                </div>
+            </div>
+            <div class="description">
+                Professional medical imaging analysis using advanced artificial intelligence technology.
+                Upload MRI scans for automated brain tumor detection and classification with clinical-grade accuracy.
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="medical-card">
+            <div class="card-header-medical">
+                <i class="fas fa-upload"></i>
+                MRI Image Upload
+            </div>
+            <div class="card-body-medical">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <div class="upload-zone" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-medical-alt"></i>
+                        </div>
+                        <div class="upload-text">Select MRI Image for Analysis</div>
+                        <div class="upload-subtext">
+                            Supported formats: JPEG, PNG, DICOM | Maximum file size: 10MB
+                        </div>
+                        
+                        <input type="file" class="file-input" id="file" name="file" accept="image/*" required>
+                        <button type="button" class="btn-medical-primary" onclick="document.getElementById('file').click()">
+                            <i class="fas fa-folder-open"></i> Browse Files
+                        </button>
+                        
+                        <div class="file-preview" id="filePreview">
+                            <div style="text-align: center;">
+                                <img class="preview-image" id="previewImage" alt="Preview">
+                                <div class="file-info" id="fileInfo"></div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-medical-success" id="analyzeBtn">
+                            <i class="fas fa-microscope"></i> Start Analysis
+                        </button>
+                    </div>
+
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-label">Analysis Progress</div>
+                        <div class="progress">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="loading-section" id="loading">
+                    <div class="medical-spinner"></div>
+                    <div class="loading-text">Analyzing MRI Scan</div>
+                    <div class="loading-subtext">Please wait while our AI processes your image...</div>
+                </div>
+            </div>
+        </div>
+
+        {% if result %}
+        <!-- Results Section -->
+        <div class="medical-card results-section">
+            <div class="card-header-medical">
+                <i class="fas fa-chart-line"></i>
+                Analysis Results
+            </div>
+            <div class="card-body-medical">
+                {% if 'No Tumor' in result %}
+                <div class="result-alert no-tumor">
+                    <div class="result-icon-large success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="result-content">
+                        <h3>{{ result }}</h3>
+                        <div class="confidence-display">Confidence Level: {{ confidence }}</div>
+                        <p>The AI analysis indicates no detectable tumor abnormalities in the provided MRI scan.</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="result-alert tumor-detected">
+                    <div class="result-icon-large warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="result-content">
+                        <h3>{{ result }}</h3>
+                        <div class="confidence-display">Confidence Level: {{ confidence }}</div>
+                        <p>The AI system has detected potential tumor abnormalities. Please consult with a medical professional for proper diagnosis.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="medical-info">
+                    <h5><i class="fas fa-info-circle"></i> Clinical Information</h5>
+                    <p><strong>Analysis Method:</strong> Deep Learning Convolutional Neural Network</p>
+                    <p><strong>Image Processing:</strong> 128x128 pixel normalization with RGB channel analysis</p>
+                    <p><strong>Classification Types:</strong> Pituitary, Glioma, Meningioma, No Tumor</p>
+                    <p><strong>Analysis Date:</strong> <span id="currentDate"></span></p>
+                </div>
+
+                <div class="image-display">
+                    <h5 style="margin-bottom: 1.5rem; color: var(--medical-blue);">
+                        <i class="fas fa-image"></i> Analyzed MRI Image
+                    </h5>
+                    <img src="{{ file_path }}" class="analyzed-image" alt="Analyzed MRI Scan">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Medical Disclaimer -->
+        <div class="medical-disclaimer">
+            <h6><i class="fas fa-exclamation-triangle"></i> Important Medical Disclaimer</h6>
+            <p>This AI-powered analysis tool is designed for research and educational purposes only. It should not be used as a substitute for professional medical diagnosis, treatment, or advice. Always consult qualified healthcare professionals for medical decisions and diagnosis confirmation.</p>
+        </div>
+    </div>
+
+    <script>
+        // File upload functionality
+        const fileInput = document.getElementById('file');
+        const uploadArea = document.getElementById('uploadArea');
+        const filePreview = document.getElementById('filePreview');
+        const previewImage = document.getElementById('previewImage');
+        const fileInfo = document.getElementById('fileInfo');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+
+        // Set current date and time when results are displayed
+        const currentDateElement = document.getElementById('currentDate');
+        if (currentDateElement) {
+            currentDateElement.textContent = new Date().toLocaleString();
+        }
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImage.src = e.target.result;
+                        fileInfo.innerHTML = `
+                            <strong>File:</strong> ${file.name}<br>
+                            <strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                            <strong>Type:</strong> ${file.type}
+                        `;
+                        filePreview.style.display = 'block';
+                        analyzeBtn.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select a valid image file (JPEG, PNG, etc.)');
+                    fileInput.value = '';
+                }
+            }
+        }
+
+        // Form submission with loading animation
+        uploadForm.addEventListener('submit', (e) => {
+            if (fileInput.files.length > 0) {
+                uploadArea.style.display = 'none';
+                loading.style.display = 'block';
+                progressContainer.style.display = 'block';
+                
+                // Simulate realistic medical analysis progress
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress > 85) progress = 85;
+                    progressBar.style.width = progress + '%';
+                }, 300);
+
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                }, 4000);
+            }
+        });
+
+        // Smooth scroll to results
+        {% if result %}
+        setTimeout(() => {
+            document.querySelector('.results-section').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 800);
+        {% endif %}
+    </script>
+</body>
+</html>

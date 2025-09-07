@@ -1,0 +1,38 @@
+# Virtual Environment
+venv/
+./venv/
+*.venv
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Flask
+instance/
+.webassets-cache
+
+# Environment variables
+.env
+.flaskenv
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model files (if too large for GitHub)
+# models/*.h5
+
+# Uploads folder (temporary files)
+uploads/*
+!uploads/.gitkeep
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
